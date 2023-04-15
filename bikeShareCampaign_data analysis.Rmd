@@ -1,0 +1,125 @@
+---
+title: "bike_share_company"
+author: "Anord Nkuba"
+date: "2023-04-15"
+output: html_document
+---
+
+#load packages
+```{r}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(data.table)
+library(readr)
+library(psych)
+library(hrbrthemes)
+library(ggplot2)
+```
+
+
+Total no. of customers
+```{r}
+print(table(clean_trip_final9$costumer_type))
+```
+
+#total number of casual and member customer from January to December 2022
+```{r}
+total_customer <- (table(clean_trip_final9$costumer_type))
+```
+
+Data visualization total number of casual and member customer from January to December 2022
+```{r}
+ggplot(data = data.frame(total_customer), aes(x = Var1, y = Freq)) + geom_bar(stat = "identity") + 
+  labs(title="total number of casual&member riders from Jan-Dec", x="customer type", y="Orders Frequency")
+```
+
+
+#Total rides for each customer type in minutes
+```{r}
+total_ride <- setNames(aggregate(ride_length ~ costumer_type, clean_trip_final9, sum), c("customer_type", "total_ride_min"))
+print(total_ride)
+```
+
+#data visualization of total rides by each customer type
+```{r}
+
+
+ggplot(total_ride, aes(x=customer_type, y=total_ride_min)) + 
+  geom_bar(stat="identity", fill="grey") + 
+  labs(title="Total Ride Length by Customer Type", x="Customer Type", y="Total Ride Length (mins)")
+```
+
+#Differences between members and casual riders in terms of length of ride
+```{r}
+print(clean_trip_final9 %>% 
+       group_by(costumer_type) %>% 
+       summarise(min_length_mins = min(ride_length), max_length_min = max(ride_length),
+                 median_length_mins = median(ride_length), mean_length_min = mean(ride_length)))
+```
+
+#data visualization average ride length between casual and member riders from Jan to Dec
+```{r}
+mean_ride_length <- clean_trip_final9 %>% group_by(costumer_type) %>% summarise(mean_length_min = mean(ride_length))
+
+ggplot(data = mean_ride_length, aes(x = costumer_type, y = mean_length_min)) + geom_bar(stat = "identity")
+
+```
+
+
+#Average ride_length for users by day_of_week and Number of total rides by day_of_week
+```{r}
+print(clean_trip_final9 %>% 
+       group_by(week_day) %>% 
+       summarise(Avg_length = mean(ride_length),
+                 number_of_ride = n()))
+```
+
+#Average ride_length by month
+```{r}
+print(clean_trip_final9 %>% 
+       group_by(month) %>% 
+       summarise(Avg_length = mean(ride_length),
+                 number_of_ride = n()))
+```
+
+#Average ride length comparison by each week day according to each customer type
+```{r}
+print(aggregate(clean_trip_final9$ride_length ~ clean_trip_final9$costumer_type + 
+                 clean_trip_final9$week_day, FUN = mean))
+```
+
+#Average ride length comparison by each month according to each customer type
+```{r}
+print(aggregate(clean_trip_final9$ride_length ~ clean_trip_final9$costumer_type + 
+                 clean_trip_final9$month, FUN = mean))
+```
+
+#Analyze rider length data by customer type and weekday
+```{r}
+print(clean_trip_final9 %>% 
+       group_by(costumer_type, week_day) %>% 
+       summarise(number_of_ride = n(),
+                 avgerage_duration = mean(ride_length),
+                 median_duration = median(ride_length),
+                 max_duration = max(ride_length),
+                 min_duration = min(ride_length)))
+
+```
+
+#Analyze rider length data by customer type and month
+```{r}
+print(clean_trip_final9 %>% 
+       group_by(costumer_type, month) %>% 
+       summarise(nummber_of_ride = n(),
+                 average_duration = mean(ride_length),
+                 median_duration = median(ride_length),
+                 max_duration = max(ride_length),
+                 min_duration = min(ride_length)))
+```
+
+
+
+
+
+
